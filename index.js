@@ -14,13 +14,14 @@ const authConfig = {
 	clientId: process.env.CLIENT_ID,
 	clientSecret: process.env.CLIENT_SECRET,
 };
+console.log(authConfig)
 const managementAPI = new ManagementClient({
 	domain: authConfig.domain,
 	clientId: authConfig.clientId,
 	clientSecret: authConfig.clientSecret,
 });
 
-app.get('api/users', (req, res) => {
+app.get('/users', (req, res) => {
 	managementAPI
 		.getUsers()
 		.then(function (users) {
@@ -31,7 +32,7 @@ app.get('api/users', (req, res) => {
 		});
 });
 
-app.get('api/users/:id/delete', (req, res) => {
+app.get('/users/:id/delete', (req, res) => {
 	managementAPI
 		.deleteUser({ id: req.params.id })
 		.then((response) => {
@@ -42,7 +43,7 @@ app.get('api/users/:id/delete', (req, res) => {
 		});
 });
 
-app.get('api/users/:id/unblock', (req, res) => {
+app.get('/users/:id/unblock', (req, res) => {
 	managementAPI
 		.updateUser({ id: req.params.id }, { blocked: false })
 		.then((response) => {
