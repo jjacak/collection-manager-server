@@ -77,10 +77,10 @@ app.patch('/users/:id', checkJwt, checkPermissions, (req, res) => {
 		.catch(function (err) {
 			res.send(err);
 		});
+	
 });
 
-app.post('/users/:id/roles', (req, res) => {
-	console.log(req.params.id)
+app.post('/users/:id/roles',checkJwt, checkPermissions, (req, res) => {
 	managementAPI
 		.assignRolestoUser({ id: req.params.id }, req.body)
 		.then((response) => {
@@ -89,7 +89,32 @@ app.post('/users/:id/roles', (req, res) => {
 		.catch(function (err) {
 			res.send(err);
 		});
+	
 });
+app.post('/users/:id/deleteroles',checkJwt, checkPermissions, (req, res) => {
+	managementAPI
+		.removeRolesFromUser({ id: req.params.id }, req.body)
+		.then((response) => {
+			res.send('Roles updated');
+		})
+		.catch(function (err) {
+			res.send(err);
+		});
+	
+});
+app.patch('/users/:id/metadata',checkJwt, checkPermissions, (req, res) => {
+	console.log(req.body)
+	managementAPI
+		.updateAppMetadata({ id: req.params.id }, req.body)
+		.then((response) => {
+			res.send('data updated');
+		})
+		.catch(function (err) {
+			res.send(err);
+		});
+	
+});
+
 
 const port = process.env.PORT || 5500;
 app.listen(port, () => {
