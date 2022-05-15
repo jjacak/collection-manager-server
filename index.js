@@ -1,12 +1,18 @@
 require('dotenv').config();
 const express = require('express');
+const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
+const jwtAuthz = require('express-jwt-authz');
+const jwt = require('express-jwt');
+const jwksRsa = require('jwks-rsa');
 let ManagementClient = require('auth0').ManagementClient;
 
 const app = express();
+app.use(bodyParser.json());
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 const authConfig = {
 	domain: process.env.AUTH0_DOMAIN,
@@ -14,14 +20,33 @@ const authConfig = {
 	clientId: process.env.CLIENT_ID,
 	clientSecret: process.env.CLIENT_SECRET,
 };
-console.log(authConfig)
+
+const checkJwt = jwt({
+	// Provide a signing key based on the key identifier in the header and the signing keys provided by your Auth0 JWKS endpoint.
+	secret: jwksRsa.expressJwtSecret({
+		cache: true,
+		rateLimit: true,
+		jwksRequestsPerMinute: 5,
+		jwksUri: `https://${authConfig.domain}/.well-known/jwks.json`,
+	}),
+
+	// Validate the audience (Identifier) and the issuer (Domain).
+	audience: authConfig.audience,
+	issuer: `https://${authConfig.domain}/`,
+	algorithms: ['RS256'],
+});
+
+const checkPermissions = jwtAuthz(['manage:users'], {
+	customScopeKey: 'permissions',
+});
+
 const managementAPI = new ManagementClient({
 	domain: authConfig.domain,
 	clientId: authConfig.clientId,
 	clientSecret: authConfig.clientSecret,
 });
 
-app.get('/users', (req, res) => {
+app.get('/users', checkJwt, checkPermissions, (req, res) => {
 	managementAPI
 		.getUsers()
 		.then(function (users) {
@@ -32,7 +57,7 @@ app.get('/users', (req, res) => {
 		});
 });
 
-app.get('/users/:id/delete', (req, res) => {
+app.get('/users/:id/delete', checkJwt, checkPermissions, (req, res) => {
 	managementAPI
 		.deleteUser({ id: req.params.id })
 		.then((response) => {
@@ -43,33 +68,28 @@ app.get('/users/:id/delete', (req, res) => {
 		});
 });
 
-app.get('/users/:id/unblock', (req, res) => {
+app.patch('/users/:id', checkJwt, checkPermissions, (req, res) => {
 	managementAPI
-		.updateUser({ id: req.params.id }, { blocked: false })
+		.updateUser({ id: req.params.id }, req.body)
 		.then((response) => {
-			res.send('User unblocked!').catch((err) => {
-				res.send(err);
-			});
+			res.send('User blocked!');
+		})
+		.catch(function (err) {
+			res.send(err);
 		});
 });
 
-app.get('api/users/:id/block', (req, res) => {
+app.post('/users/:id/roles', (req, res) => {
+	console.log(req.params.id)
 	managementAPI
-		.updateUser({ id: req.params.id }, { blocked: true })
+		.assignRolestoUser({ id: req.params.id }, req.body)
 		.then((response) => {
-			res.send('User blocked!').catch((err) => {
-				res.send(err);
-			});
+			res.send('Roles updated');
+		})
+		.catch(function (err) {
+			res.send(err);
 		});
 });
-
-app.get('api/users/:id/roles', (req,res)=>{
-    managementAPI.assignRolestoUser({id:req.params.id},{roles: req.data.roles}).then(response=>{
-        res.send('User roles updated!').catch(err=>{
-            res.send(err)
-        })
-    })
-})
 
 const port = process.env.PORT || 5500;
 app.listen(port, () => {
