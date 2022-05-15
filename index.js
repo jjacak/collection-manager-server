@@ -46,7 +46,7 @@ const managementAPI = new ManagementClient({
 	clientSecret: authConfig.clientSecret,
 });
 
-app.get('/users', (req, res) => {
+app.get('/users', checkJwt, checkPermissions, (req, res) => {
 	managementAPI
 		.getUsers()
 		.then(function (users) {
