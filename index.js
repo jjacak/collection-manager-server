@@ -115,6 +115,19 @@ app.patch('/users/:id/metadata',checkJwt, checkPermissions, (req, res) => {
 	
 });
 
+app.get('/users/:id',checkJwt, checkPermissions, (req, res) => {
+
+	managementAPI
+		.getUser({ id: req.params.id })
+		.then((user) => {
+			res.send(user);
+		})
+		.catch(function (err) {
+			res.send(err);
+		});
+	
+});
+
 
 const port = process.env.PORT || 5500;
 app.listen(port, () => {
