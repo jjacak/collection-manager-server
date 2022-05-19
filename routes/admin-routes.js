@@ -5,6 +5,8 @@ const assignRoles = require('express').Router();
 const deleteRoles = require('express').Router();
 const updateMetadata = require('express').Router();
 const getUserById = require('express').Router();
+
+
 const {
 	checkJwt,
 	checkPermissions,
@@ -74,7 +76,6 @@ updateMetadata.patch(
 	checkJwt,
 	checkPermissions,
 	(req, res) => {
-		console.log(req.body);
 		managementAPI
 			.updateAppMetadata({ id: req.params.id }, req.body)
 			.then((response) => {
@@ -97,10 +98,6 @@ getUserById.get('/users/:id', checkJwt, checkPermissions, (req, res) => {
 		});
 });
 
-exports.getUsers = getUsers;
-exports.deleteUser = deleteUser;
-exports.blockUser = blockUser;
-exports.assignRoles = assignRoles;
-exports.deleteRoles = deleteRoles;
-exports.updateMetadata = updateMetadata;
-exports.getUserById = getUserById;
+module.exports= {
+	getUsers,deleteUser,blockUser,assignRoles,deleteRoles,updateMetadata,getUserById
+}

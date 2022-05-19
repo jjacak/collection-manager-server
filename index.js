@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const bodyParser = require('body-parser');
+const mongoose = require("mongoose");
 const {
 	getUsers,
 	deleteUser,
@@ -16,8 +16,11 @@ const {
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
+
+mongoose.connect(
+	process.env.MONGODB_URI || 'mongodb://localhost:27017/collection-manager'
+);
 
 app.use(getUsers);
 app.use(deleteUser);
