@@ -15,7 +15,13 @@ const {
 const { createCollection, getCollections } = require('./routes/user-routes');
 
 const app = express();
-app.use(cors());
+
+const corsOptions = {
+	origin: 'https://collection-manager.netlify.app/',
+	optionsSuccessStatus: 200 
+  }
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
