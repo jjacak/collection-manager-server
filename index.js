@@ -21,7 +21,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 mongoose.connect(
-	process.env.MONGODB_URI || 'mongodb://localhost:27017/collection-manager'
+	process.env.MONGODB_URI
 );
 
 app.use(getUsers);
