@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const Item = new mongoose.Schema({
 	name: { type: String, required: true },
-	tags: { type: Array },
+	tags: [{type: String}],
 	author: { type: String, required: true },
 	comments: [{ comment_author: String, comment_body: String }],
 	likes: { type: Array },
@@ -11,7 +11,7 @@ const Item = new mongoose.Schema({
 const Collection = new mongoose.Schema(
 	{
 		owner_id: { type: String, required: true },
-		tags: { type: Array },
+		tags: [{type: String}],
 		title: { type: String, required: true },
 		image: { type: String },
 		cloudinary_id: { type: String },

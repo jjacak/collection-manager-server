@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 const {
 	getUsers,
 	deleteUser,
@@ -12,6 +12,7 @@ const {
 	updateMetadata,
 	getUserById,
 } = require('./routes/admin-routes');
+const { createCollection, getCollections } = require('./routes/user-routes');
 
 const app = express();
 app.use(cors());
@@ -29,6 +30,15 @@ app.use(assignRoles);
 app.use(deleteRoles);
 app.use(updateMetadata);
 app.use(getUserById);
+app.use(createCollection);
+app.use(getCollections);
+
+app.use((err, req, res, next) => {
+	console.log(err.message);
+	res.status(500).json({
+		msg: err.message,
+	});
+});
 
 const port = process.env.PORT || 5500;
 app.listen(port, () => {
