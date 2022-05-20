@@ -15,6 +15,14 @@ const {
 const { createCollection, getCollections } = require('./routes/user-routes');
 
 const app = express();
+app.use(function (req, res, next) {
+
+    res.setHeader('Access-Control-Allow-Origin', 'https://collection-manager.netlify.app/');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+    res.setHeader('Access-Control-Allow-Credentials', true);
+
+    next();
+});
 
 const corsOptions = {
 	origin: 'https://collection-manager.netlify.app/',
