@@ -28,7 +28,7 @@ createCollection.post(
 			});
 			res.json(collection);
 		} catch (error) {
-			res.json(error);
+			res.json(new Error(error.message));
 		}
 	}
 );
