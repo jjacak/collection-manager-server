@@ -28,7 +28,9 @@ createCollection.post(
 			});
 			res.json(collection);
 		} catch (error) {
-			res.json(new Error(error.message));
+			res.status(500).send({
+				message: 'Creating collection failed'
+			 });
 		}
 	}
 );
