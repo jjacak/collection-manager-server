@@ -1,6 +1,7 @@
 const createCollection = require('express').Router();
 const getCollections = require('express').Router();
 const getCollectionById = require('express').Router();
+const addItem = require('express').Router();
 const cloudinary = require('../utils/cloudinary');
 const upload = require('../utils/multer');
 const Collection = require('../models/collection.model');
@@ -29,8 +30,8 @@ createCollection.post(
 			res.json(collection);
 		} catch (error) {
 			res.status(500).send({
-				message: 'Creating collection failed'
-			 });
+				message: 'Creating collection failed',
+			});
 		}
 	}
 );
@@ -40,7 +41,9 @@ getCollections.get('/get-collections/:id', async (req, res) => {
 		const data = await Collection.find({ owner_id: req.params.id });
 		res.json(data);
 	} catch (error) {
-		res.json(error);
+		res.status(500).send({
+			message: 'Failed to find requested collections',
+		});
 	}
 });
 
@@ -49,8 +52,24 @@ getCollectionById.get('/get-collection/:id', async (req, res) => {
 		const data = await Collection.find({ _id: req.params.id });
 		res.json(data);
 	} catch (error) {
-		res.json(error);
+		res.status(500).send({
+			message: 'Failed to find requested collection',
+		});
 	}
 });
 
-module.exports = { createCollection, getCollections, getCollectionById };
+addItem.post('/add-item/:id', async (req, res) => {
+	try {
+		const collection= await Collection.findOneAndUpdate({ _id: req.params.id }, { $push: { items: req.body  } });
+		res.send(collection)
+	} catch (error) {
+		res.status(500).send({ message: 'Failed to add item' });
+	}
+});
+
+module.exports = {
+	createCollection,
+	getCollections,
+	getCollectionById,
+	addItem,
+};

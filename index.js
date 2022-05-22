@@ -12,7 +12,7 @@ const {
 	updateMetadata,
 	getUserById,
 } = require('./routes/admin-routes');
-const { createCollection, getCollections, getCollectionById } = require('./routes/user-routes');
+const { createCollection, getCollections, getCollectionById, addItem } = require('./routes/user-routes');
 
 const app = express();
 
@@ -34,7 +34,8 @@ app.use(updateMetadata);
 app.use(getUserById);
 app.use(createCollection);
 app.use(getCollections);
-app.use(getCollectionById)
+app.use(getCollectionById);
+app.use(addItem)
 
 app.use((err, req, res, next) => {
 	console.log(err.message);
