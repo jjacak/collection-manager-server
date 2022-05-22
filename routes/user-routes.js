@@ -8,7 +8,6 @@ const { checkJwt } = require('../middleware/auth');
 
 createCollection.post(
 	'/create-collection',
-	checkJwt,
 	upload.single('image'),
 	async (req, res) => {
 		let result;
