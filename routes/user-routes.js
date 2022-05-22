@@ -8,6 +8,7 @@ const { checkJwt } = require('../middleware/auth');
 
 createCollection.post(
 	'/create-collection',
+	checkJwt,
 	upload.single('image'),
 	async (req, res) => {
 		let result;
@@ -17,7 +18,7 @@ createCollection.post(
 			}
 			let collection = await Collection.create({
 				owner_id: req.body.owner_id,
-				owner_name:req.body.owner_name,
+				owner_name: req.body.owner_name,
 				tags: JSON.parse(req.body.tags),
 				title: req.body.title,
 				topic: req.body.topic,
