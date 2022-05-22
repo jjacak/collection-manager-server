@@ -11,6 +11,7 @@ const Item = new mongoose.Schema({
 const Collection = new mongoose.Schema(
 	{
 		owner_id: { type: String, required: true },
+		owner_name:{type:String, required:true},
 		tags: [{type: String}],
 		title: { type: String, required: true },
 		image: { type: String },

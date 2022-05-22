@@ -1,5 +1,6 @@
 const createCollection = require('express').Router();
 const getCollections = require('express').Router();
+const getCollectionById = require('express').Router();
 const cloudinary = require('../utils/cloudinary');
 const upload = require('../utils/multer');
 const Collection = require('../models/collection.model');
@@ -17,6 +18,7 @@ createCollection.post(
 			}
 			let collection = await Collection.create({
 				owner_id: req.body.owner_id,
+				owner_name:req.body.owner_name,
 				tags: JSON.parse(req.body.tags),
 				title: req.body.title,
 				topic: req.body.topic,
@@ -34,10 +36,19 @@ createCollection.post(
 getCollections.get('/get-collections/:id', async (req, res) => {
 	try {
 		const data = await Collection.find({ owner_id: req.params.id });
-		res.json(data)
+		res.json(data);
 	} catch (error) {
 		res.json(error);
 	}
 });
 
-module.exports = { createCollection, getCollections };
+getCollectionById.get('/get-collection/:id', async (req, res) => {
+	try {
+		const data = await Collection.find({ _id: req.params.id });
+		res.json(data);
+	} catch (error) {
+		res.json(error);
+	}
+});
+
+module.exports = { createCollection, getCollections, getCollectionById };
