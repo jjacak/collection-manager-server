@@ -12,7 +12,14 @@ const {
 	updateMetadata,
 	getUserById,
 } = require('./routes/admin-routes');
-const { createCollection, getCollections, getCollectionById, addItem } = require('./routes/user-routes');
+const {
+	createCollection,
+	getCollections,
+	getCollectionById,
+	addItem,
+	getLargestCollections,
+	getNewestItems,
+} = require('./routes/user-routes');
 
 const app = express();
 
@@ -20,9 +27,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-mongoose.connect(
-	process.env.MONGODB_URI
-);
+mongoose.connect(process.env.MONGODB_URI);
 
 app.use(getUsers);
 app.use(deleteUser);
@@ -34,7 +39,9 @@ app.use(getUserById);
 app.use(createCollection);
 app.use(getCollections);
 app.use(getCollectionById);
-app.use(addItem)
+app.use(addItem);
+app.use(getLargestCollections);
+app.use(getNewestItems);
 
 app.use((err, req, res, next) => {
 	console.log(err.message);

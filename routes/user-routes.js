@@ -1,6 +1,8 @@
 const createCollection = require('express').Router();
 const getCollections = require('express').Router();
 const getCollectionById = require('express').Router();
+const getLargestCollections = require('express').Router();
+const getNewestItems = require('express').Router();
 const addItem = require('express').Router();
 const cloudinary = require('../utils/cloudinary');
 const upload = require('../utils/multer');
@@ -58,12 +60,54 @@ getCollectionById.get('/get-collection/:id', async (req, res) => {
 	}
 });
 
-addItem.post('/add-item/:id',editAccess, async (req, res) => {
+addItem.post('/add-item/:id', editAccess, async (req, res) => {
 	try {
-		const collection= await Collection.findOneAndUpdate({ _id: req.params.id }, { $push: { items: req.body  } });
-		res.send(collection)
+		const collection = await Collection.findOneAndUpdate(
+			{ _id: req.params.id },
+			{ $push: { items: req.body } }
+		);
+		res.send(collection);
 	} catch (error) {
 		res.status(500).send({ message: 'Failed to add item' });
+	}
+});
+
+getLargestCollections.get('/get-largest-collections', async (req, res) => {
+	try {
+		const data = await Collection.aggregate([
+			{ $unwind: '$items' },
+			{ $group: { _id: '$_id', len: { $sum: 1 } } },
+			{ $sort: { len: -1 } },
+			{ $limit: 5 },
+		]);
+		collectionsId = data.map((c) => c._id);
+		const collections = await Collection.find({ _id: { $in: collectionsId } });
+		res.json(collections);
+	} catch (error) {
+		res.status(500).send({ message: 'Failed to get requested collections' });
+	}
+});
+
+getNewestItems.get('/get-newest', async (req, res) => {
+	try{const data = await Collection.aggregate([
+		{
+			$sort: {
+				updatedAt: -1,
+			},
+		},
+		{
+			$project: {
+				title: 1,
+				items: { $slice: ['$items', -1] },
+				owner_id:1,
+				owner_name:1
+			},
+		},{$limit:5}
+	]);
+	const items = data.filter((c) => c.items.length > 0)
+	res.json(items);}
+	catch(error){
+		res.status(500).send({message:'Failed to get latest items.'})
 	}
 });
 
@@ -72,4 +116,6 @@ module.exports = {
 	getCollections,
 	getCollectionById,
 	addItem,
+	getLargestCollections,
+	getNewestItems,
 };

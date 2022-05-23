@@ -24,7 +24,7 @@ const Collection = new mongoose.Schema(
 		topic: { type: String, required: true },
 		items: [Item],
 	},
-	{ collection: 'collection-data', strict:false }
+	{ collection: 'collection-data', strict:false , timestamps:true}
 );
 Collection.index({ 'items.$**': 'text' });
 
