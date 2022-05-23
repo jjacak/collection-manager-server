@@ -5,7 +5,7 @@ const addItem = require('express').Router();
 const cloudinary = require('../utils/cloudinary');
 const upload = require('../utils/multer');
 const Collection = require('../models/collection.model');
-const { checkJwt } = require('../middleware/auth');
+const { checkJwt, editAccess } = require('../middleware/auth');
 
 createCollection.post(
 	'/create-collection',
@@ -58,7 +58,7 @@ getCollectionById.get('/get-collection/:id', async (req, res) => {
 	}
 });
 
-addItem.post('/add-item/:id', async (req, res) => {
+addItem.post('/add-item/:id',editAccess, async (req, res) => {
 	try {
 		const collection= await Collection.findOneAndUpdate({ _id: req.params.id }, { $push: { items: req.body  } });
 		res.send(collection)

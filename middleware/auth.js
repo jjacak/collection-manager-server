@@ -2,6 +2,11 @@ const jwtAuthz = require('express-jwt-authz');
 const jwt = require('express-jwt');
 const jwksRsa = require('jwks-rsa');
 let ManagementClient = require('auth0').ManagementClient;
+const mongoose = require('mongoose');
+const Collection = require('../models/collection.model');
+const jwt_decode = require('jwt-decode');
+
+mongoose.connect(process.env.MONGODB_URI);
 
 const authConfig = {
 	domain: process.env.AUTH0_DOMAIN,
@@ -32,7 +37,38 @@ const checkPermissions = jwtAuthz(['manage:users'], {
 	customScopeKey: 'permissions',
 });
 
+const editAccess = async (req, res, next) => {
+	try {
+		const bearerHeader = req.headers['authorization'];
+		if (typeof token === undefined) {
+			res.status(401).json({
+				error: new Error('Unauthorized!'),
+			});
+		}
+			const bearer = bearerHeader.split(' ');
+			const bearerToken = bearer[1];
+			const decodedToken = jwt_decode(bearerToken);
+			const collection = await Collection.findOne({ _id: req.params.id });
+
+			if (collection.owner_id === decodedToken.sub) {
+				console.log('authorized');
+				next();
+			} else {
+				console.log('unauthorized');
+				res.status(401).json({
+					error: new Error('Unauthorized!'),
+				});
+			}
+		
+	} catch (error) {
+		res.status(401).json({
+			error: new Error('Invalid request!'),
+		});
+	}
+};
+
 exports.authConfig = authConfig;
 exports.checkJwt = checkJwt;
 exports.checkPermissions = checkPermissions;
 exports.managementAPI = managementAPI;
+exports.editAccess = editAccess;
