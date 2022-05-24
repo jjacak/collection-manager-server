@@ -3,6 +3,7 @@ const getCollections = require('express').Router();
 const getCollectionById = require('express').Router();
 const getLargestCollections = require('express').Router();
 const getNewestItems = require('express').Router();
+const getItem = require('express').Router();
 const addItem = require('express').Router();
 const cloudinary = require('../utils/cloudinary');
 const upload = require('../utils/multer');
@@ -89,25 +90,38 @@ getLargestCollections.get('/get-largest-collections', async (req, res) => {
 });
 
 getNewestItems.get('/get-newest', async (req, res) => {
-	try{const data = await Collection.aggregate([
-		{
-			$sort: {
-				updatedAt: -1,
+	try {
+		const data = await Collection.aggregate([
+			{
+				$sort: {
+					updatedAt: -1,
+				},
 			},
-		},
-		{
-			$project: {
-				title: 1,
-				items: { $slice: ['$items', -1] },
-				owner_id:1,
-				owner_name:1
+			{
+				$project: {
+					title: 1,
+					items: { $slice: ['$items', -1] },
+					owner_id: 1,
+					owner_name: 1,
+				},
 			},
-		},{$limit:5}
-	]);
-	const items = data.filter((c) => c.items.length > 0)
-	res.json(items);}
-	catch(error){
-		res.status(500).send({message:'Failed to get latest items.'})
+			{ $limit: 6 },
+		]);
+		const items = data.filter((c) => c.items.length > 0);
+		res.json(items);
+	} catch (error) {
+		res.status(500).send({ message: 'Failed to get latest items.' });
+	}
+});
+
+getItem.get('/get-item/:id', async (req, res) => {
+	try {
+		const data = await Collection.findOne({
+			'items._id': req.params.id,
+		});
+		res.json(data);
+	} catch (error) {
+		console.log(error);
 	}
 });
 
@@ -118,4 +132,5 @@ module.exports = {
 	addItem,
 	getLargestCollections,
 	getNewestItems,
+	getItem,
 };
