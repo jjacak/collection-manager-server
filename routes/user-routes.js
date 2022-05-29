@@ -5,6 +5,7 @@ const getLargestCollections = require('express').Router();
 const getNewestItems = require('express').Router();
 const getItem = require('express').Router();
 const addItem = require('express').Router();
+const deleteCollections = require('express').Router();
 const cloudinary = require('../utils/cloudinary');
 const upload = require('../utils/multer');
 const Collection = require('../models/collection.model');
@@ -125,6 +126,17 @@ getItem.get('/get-item/:id', async (req, res) => {
 	}
 });
 
+deleteCollections.delete('/delete-collections/:id',editAccess, async (req, res) => {
+	try {
+		await Collection.deleteMany({
+			$or: [{ _id: req.params.id }, { owner_id: req.params.id }],
+		});
+		res.send({ message: 'Collections deleted.' });
+	} catch (error) {
+		res.status(500).send({ message: 'Failed to delete collections.' });
+	}
+});
+
 module.exports = {
 	createCollection,
 	getCollections,
@@ -133,4 +145,5 @@ module.exports = {
 	getLargestCollections,
 	getNewestItems,
 	getItem,
+	deleteCollections,
 };
