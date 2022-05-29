@@ -50,7 +50,7 @@ const editAccess = async (req, res, next) => {
 			const decodedToken = jwt_decode(bearerToken);
 			const collection = await Collection.findOne({ _id: req.params.id });
 
-			if (collection.owner_id === decodedToken.sub) {
+			if (collection.owner_id === decodedToken.sub || decodedToken['http:/collection-manager-app.com/roles'].includes('admin')) {
 				console.log('authorized');
 				next();
 			} else {
