@@ -128,7 +128,15 @@ getItem.get('/get-item/:id', async (req, res) => {
 
 deleteCollections.delete('/delete-collections/:id',editAccess, async (req, res) => {
 	try {
-		await Collection.deleteMany({
+		const collections = await Collection.find({
+			$or: [{ _id: req.params.id }, { owner_id: req.params.id }],
+		})
+		for (const collection of collections){
+			if(collection.cloudinary_id) {
+				await cloudinary.uploader.destroy(collection.cloudinary_id)
+			}
+		}
+		coll = await Collection.deleteMany({
 			$or: [{ _id: req.params.id }, { owner_id: req.params.id }],
 		});
 		res.send({ message: 'Collections deleted.' });
