@@ -48,7 +48,9 @@ const editAccess = async (req, res, next) => {
 			const bearer = bearerHeader.split(' ');
 			const bearerToken = bearer[1];
 			const decodedToken = jwt_decode(bearerToken);
-			const collection = await Collection.findOne({ _id: req.params.id });
+			const collection = await Collection.findOne({
+				$or: [{ _id: req.params.id }, {'items._id': req.params.id }],
+			});
 
 			if (collection.owner_id === decodedToken.sub || decodedToken['http:/collection-manager-app.com/roles'].includes('admin')) {
 				console.log('authorized');
@@ -61,6 +63,7 @@ const editAccess = async (req, res, next) => {
 			}
 		
 	} catch (error) {
+		console.log(error)
 		res.status(401).json({
 			error: new Error('Invalid request!'),
 		});

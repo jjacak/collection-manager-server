@@ -21,6 +21,7 @@ const {
 	getNewestItems,
 	getItem,
 	deleteCollections,
+	deleteItemById
 } = require('./routes/user-routes');
 
 const app = express();
@@ -46,6 +47,7 @@ app.use(getLargestCollections);
 app.use(getNewestItems);
 app.use(getItem);
 app.use(deleteCollections);
+app.use(deleteItemById)
 
 app.use((err, req, res, next) => {
 	console.log(err.message);
