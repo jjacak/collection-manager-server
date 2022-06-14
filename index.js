@@ -19,7 +19,6 @@ const {
 	addItem,
 	getLargestCollections,
 	getNewestItems,
-	getItem,
 	deleteCollections,
 	deleteItemById
 } = require('./routes/user-routes');
@@ -45,7 +44,6 @@ app.use(getCollectionById);
 app.use(addItem);
 app.use(getLargestCollections);
 app.use(getNewestItems);
-app.use(getItem);
 app.use(deleteCollections);
 app.use(deleteItemById)
 

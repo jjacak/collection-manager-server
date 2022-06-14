@@ -3,7 +3,6 @@ const getCollections = require('express').Router();
 const getCollectionById = require('express').Router();
 const getLargestCollections = require('express').Router();
 const getNewestItems = require('express').Router();
-const getItem = require('express').Router();
 const addItem = require('express').Router();
 const deleteCollections = require('express').Router();
 const deleteItemById = require('express').Router();
@@ -54,7 +53,8 @@ getCollections.get('/get-collections/:id', async (req, res) => {
 
 getCollectionById.get('/get-collection/:id', async (req, res) => {
 	try {
-		const data = await Collection.findOne({ _id: req.params.id });
+		// const data = await Collection.findOne({ _id: req.params.id });
+		const data = await Collection.findOne({$or: [{ _id: req.params.id }, { 'items._id': req.params.id}],});
 		res.json(data);
 	} catch (error) {
 		res.status(500).send({
@@ -116,17 +116,6 @@ getNewestItems.get('/get-newest', async (req, res) => {
 	}
 });
 
-getItem.get('/get-item/:id', async (req, res) => {
-	try {
-		const data = await Collection.findOne({
-			'items._id': req.params.id,
-		});
-		res.json(data);
-	} catch (error) {
-		console.log(error);
-	}
-});
-
 deleteCollections.delete('/delete-collections/:id',editAccess, async (req, res) => {
 	try {
 		const collections = await Collection.find({
@@ -163,7 +152,7 @@ module.exports = {
 	addItem,
 	getLargestCollections,
 	getNewestItems,
-	getItem,
 	deleteCollections,
 	deleteItemById
 };
+
