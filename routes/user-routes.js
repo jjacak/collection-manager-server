@@ -6,6 +6,7 @@ const getNewestItems = require('express').Router();
 const addItem = require('express').Router();
 const deleteCollections = require('express').Router();
 const deleteItemById = require('express').Router();
+const editCollection = require('express').Router();
 const cloudinary = require('../utils/cloudinary');
 const upload = require('../utils/multer');
 const Collection = require('../models/collection.model');
@@ -54,7 +55,9 @@ getCollections.get('/get-collections/:id', async (req, res) => {
 getCollectionById.get('/get-collection/:id', async (req, res) => {
 	try {
 		// const data = await Collection.findOne({ _id: req.params.id });
-		const data = await Collection.findOne({$or: [{ _id: req.params.id }, { 'items._id': req.params.id}],});
+		const data = await Collection.findOne({
+			$or: [{ _id: req.params.id }, { 'items._id': req.params.id }],
+		});
 		res.json(data);
 	} catch (error) {
 		res.status(500).send({
@@ -116,34 +119,51 @@ getNewestItems.get('/get-newest', async (req, res) => {
 	}
 });
 
-deleteCollections.delete('/delete-collections/:id',editAccess, async (req, res) => {
-	try {
-		const collections = await Collection.find({
-			$or: [{ _id: req.params.id }, { owner_id: req.params.id }],
-		})
-		for (const collection of collections){
-			if(collection.cloudinary_id) {
-				await cloudinary.uploader.destroy(collection.cloudinary_id)
+deleteCollections.delete(
+	'/delete-collections/:id',
+	editAccess,
+	async (req, res) => {
+		try {
+			const collections = await Collection.find({
+				$or: [{ _id: req.params.id }, { owner_id: req.params.id }],
+			});
+			for (const collection of collections) {
+				if (collection.cloudinary_id) {
+					await cloudinary.uploader.destroy(collection.cloudinary_id);
+				}
 			}
+			await Collection.deleteMany({
+				$or: [{ _id: req.params.id }, { owner_id: req.params.id }],
+			});
+			res.send({ message: 'Collections deleted.' });
+		} catch (error) {
+			res.status(500).send({ message: 'Failed to delete collections.' });
 		}
-		await Collection.deleteMany({
-			$or: [{ _id: req.params.id }, { owner_id: req.params.id }],
-		});
-		res.send({ message: 'Collections deleted.' });
+	}
+);
+
+deleteItemById.delete('/delete-item/:id', editAccess, async (req, res) => {
+	try {
+		const data = await Collection.updateOne(
+			{ 'items._id': req.params.id },
+			{ $pull: { items: { _id: req.params.id } } }
+		);
+		res.send({ message: 'Item deleted' });
 	} catch (error) {
-		res.status(500).send({ message: 'Failed to delete collections.' });
+		res.status(500).send({ message: 'Failed to delete item.' });
 	}
 });
 
-deleteItemById.delete('/delete-item/:id', editAccess, async(req,res)=>{
+editCollection.patch('/edit-collection/:id', editAccess, async (req, res) => {
 	try {
-		const data = await Collection.updateOne({'items._id':req.params.id},{$pull:{items:{_id:req.params.id}}})
-		res.send({message:'Item deleted'})
+		await Collection.updateOne({_id:req.params.id},{title:req.body.title, description:req.body.description, topic:req.body.topic, tags:req.body.tags});
+		res.send({ message: 'Collection updated.' });
 
-	}catch(error){
-		res.status(500).send({message:'Failed to delete item.'})
+	} catch (error) {
+		console.log(error)
+		res.status(500).send({ message: 'Failed to edit collection.' });
 	}
-})
+});
 
 module.exports = {
 	createCollection,
@@ -153,6 +173,6 @@ module.exports = {
 	getLargestCollections,
 	getNewestItems,
 	deleteCollections,
-	deleteItemById
+	deleteItemById,
+	editCollection,
 };
-

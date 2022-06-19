@@ -20,7 +20,8 @@ const {
 	getLargestCollections,
 	getNewestItems,
 	deleteCollections,
-	deleteItemById
+	deleteItemById,
+	editCollection,
 } = require('./routes/user-routes');
 
 const app = express();
@@ -45,7 +46,8 @@ app.use(addItem);
 app.use(getLargestCollections);
 app.use(getNewestItems);
 app.use(deleteCollections);
-app.use(deleteItemById)
+app.use(deleteItemById);
+app.use(editCollection);
 
 app.use((err, req, res, next) => {
 	console.log(err.message);

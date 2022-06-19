@@ -53,10 +53,8 @@ const editAccess = async (req, res, next) => {
 			});
 
 			if (collection.owner_id === decodedToken.sub || decodedToken['http:/collection-manager-app.com/roles'].includes('admin')) {
-				console.log('authorized');
 				next();
 			} else {
-				console.log('unauthorized');
 				res.status(401).json({
 					error: new Error('Unauthorized!'),
 				});
