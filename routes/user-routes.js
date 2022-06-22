@@ -7,6 +7,8 @@ const addItem = require('express').Router();
 const deleteCollections = require('express').Router();
 const deleteItemById = require('express').Router();
 const editCollection = require('express').Router();
+const deleteImage = require('express').Router();
+const editImage = require('express').Router();
 const cloudinary = require('../utils/cloudinary');
 const upload = require('../utils/multer');
 const Collection = require('../models/collection.model');
@@ -156,12 +158,57 @@ deleteItemById.delete('/delete-item/:id', editAccess, async (req, res) => {
 
 editCollection.patch('/edit-collection/:id', editAccess, async (req, res) => {
 	try {
-		await Collection.updateOne({_id:req.params.id},{title:req.body.title, description:req.body.description, topic:req.body.topic, tags:req.body.tags});
+		await Collection.updateOne(
+			{ _id: req.params.id },
+			{
+				title: req.body.title,
+				description: req.body.description,
+				topic: req.body.topic,
+				tags: req.body.tags,
+			}
+		);
 		res.send({ message: 'Collection updated.' });
-
 	} catch (error) {
-		console.log(error)
 		res.status(500).send({ message: 'Failed to edit collection.' });
+	}
+});
+
+deleteImage.delete('/delete-image/:id', editAccess, async (req, res) => {
+	try {
+		const collection = await Collection.findOneAndUpdate(
+			{ _id: req.params.id },
+			{ image: null, cloudinary_id: null }
+		);
+
+		if (collection.cloudinary_id) {
+			await cloudinary.uploader.destroy(collection.cloudinary_id);
+		}
+		res.send({ message: 'Image deleted.' });
+	} catch (error) {
+		res.status(500).send({ message: 'Failed to delete image.' });
+	}
+});
+
+editImage.patch('/edit-image/:id', editAccess, upload.single('image'), async (req, res) => {
+	try {
+		if (req.body.cloudinary_id) {
+			await cloudinary.uploader.destroy(req.body.cloudinary_id);
+		}
+		let result;
+		if (req.file) {
+			result = await cloudinary.uploader.upload(req.file.path);
+		}
+		await Collection.updateOne(
+			{ _id: req.params.id },
+			{
+				image: result ? result.secure_url : null,
+				cloudinary_id: result ? result.public_id : null,
+			}
+		);
+
+		res.send({ message: 'Image updated.' });
+	} catch (error) {
+		res.status(500).send({ message: 'Failed to update image.' });
 	}
 });
 
@@ -175,4 +222,6 @@ module.exports = {
 	deleteCollections,
 	deleteItemById,
 	editCollection,
+	deleteImage,
+	editImage,
 };
