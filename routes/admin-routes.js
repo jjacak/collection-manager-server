@@ -5,6 +5,7 @@ const assignRoles = require('express').Router();
 const deleteRoles = require('express').Router();
 const updateMetadata = require('express').Router();
 const getUserById = require('express').Router();
+const Collection = require('../models/collection.model')
 
 
 const {
@@ -24,15 +25,16 @@ getUsers.get('/users', checkJwt, checkPermissions, (req, res) => {
 		});
 });
 
-deleteUser.get('/users/:id/delete', checkJwt, checkPermissions, (req, res) => {
-	managementAPI
-		.deleteUser({ id: req.params.id })
-		.then((response) => {
-			res.send('User deleted!');
-		})
-		.catch(function (err) {
-			res.send(err);
-		});
+deleteUser.get('/users/:id/delete', checkJwt, checkPermissions, async(req, res) => {
+
+	try{
+		await managementAPI.deleteUser({ id: req.params.id })
+		await Collection.deleteMany({owner_id:req.params.id})
+		res.send('User deleted!');
+
+	}catch(error){
+		res.send(err);
+	}
 });
 
 blockUser.patch('/users/:id', checkJwt, checkPermissions, (req, res) => {
