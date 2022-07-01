@@ -23,7 +23,8 @@ const {
 	deleteItemById,
 	editCollection,
 	deleteImage,
-	editImage
+	editImage,
+	editItem,
 } = require('./routes/user-routes');
 
 const app = express();
@@ -52,6 +53,7 @@ app.use(deleteItemById);
 app.use(editCollection);
 app.use(deleteImage);
 app.use(editImage);
+app.use(editItem);
 
 app.use((err, req, res, next) => {
 	console.log(err.message);

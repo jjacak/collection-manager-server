@@ -9,6 +9,7 @@ const deleteItemById = require('express').Router();
 const editCollection = require('express').Router();
 const deleteImage = require('express').Router();
 const editImage = require('express').Router();
+const editItem = require('express').Router();
 const cloudinary = require('../utils/cloudinary');
 const upload = require('../utils/multer');
 const Collection = require('../models/collection.model');
@@ -189,26 +190,44 @@ deleteImage.delete('/delete-image/:id', editAccess, async (req, res) => {
 	}
 });
 
-editImage.patch('/edit-image/:id', editAccess, upload.single('image'), async (req, res) => {
-	try {
-		if (req.body.cloudinary_id) {
-			await cloudinary.uploader.destroy(req.body.cloudinary_id);
-		}
-		let result;
-		if (req.file) {
-			result = await cloudinary.uploader.upload(req.file.path);
-		}
-		await Collection.updateOne(
-			{ _id: req.params.id },
-			{
-				image: result ? result.secure_url : null,
-				cloudinary_id: result ? result.public_id : null,
+editImage.patch(
+	'/edit-image/:id',
+	editAccess,
+	upload.single('image'),
+	async (req, res) => {
+		try {
+			if (req.body.cloudinary_id) {
+				await cloudinary.uploader.destroy(req.body.cloudinary_id);
 			}
-		);
+			let result;
+			if (req.file) {
+				result = await cloudinary.uploader.upload(req.file.path);
+			}
+			await Collection.updateOne(
+				{ _id: req.params.id },
+				{
+					image: result ? result.secure_url : null,
+					cloudinary_id: result ? result.public_id : null,
+				}
+			);
 
-		res.send({ message: 'Image updated.' });
+			res.send({ message: 'Image updated.' });
+		} catch (error) {
+			res.status(500).send({ message: 'Failed to update image.' });
+		}
+	}
+);
+
+editItem.patch('/edit-item/:id', editAccess, async (req, res) => {
+	try {
+		const newItem = { ...req.body, _id: req.params.id };
+		await Collection.updateOne(
+			{ 'items._id': req.params.id },
+			{ $set: { 'items.$': newItem } }
+		);
+		res.send({ message: 'Item updated.' });
 	} catch (error) {
-		res.status(500).send({ message: 'Failed to update image.' });
+		res.status(500).send({ message: 'Failed to update item.' });
 	}
 });
 
@@ -224,4 +243,5 @@ module.exports = {
 	editCollection,
 	deleteImage,
 	editImage,
+	editItem,
 };
